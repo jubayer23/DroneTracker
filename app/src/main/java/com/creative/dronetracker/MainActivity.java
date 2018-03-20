@@ -1,10 +1,16 @@
 package com.creative.dronetracker;
 
+import android.content.Intent;
 import android.support.v4.app.FragmentTransaction;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 
 import com.creative.dronetracker.Utility.GpsEnableTool;
 import com.creative.dronetracker.Utility.LastLocationOnly;
+import com.creative.dronetracker.alertbanner.AlertDialogForAnything;
+import com.creative.dronetracker.appdata.MydApplication;
 import com.creative.dronetracker.fragment.HomeFragment;
 
 public class MainActivity extends BaseActivity {
@@ -48,5 +54,31 @@ public class MainActivity extends BaseActivity {
             gpsEnableTool.enableGPs();
             return;
         }
+    }
+
+    public boolean onCreateOptionsMenu(Menu paramMenu) {
+        getMenuInflater().inflate(R.menu.menu_main, paramMenu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem paramMenuItem) {
+
+        switch (paramMenuItem.getItemId()) {
+
+            case R.id.action_logout:
+               if(MydApplication.getInstance().getPrefManger().getDrivingStatus()){
+                   AlertDialogForAnything.showAlertDialogWhenComplte(this,"Alert!","You cannot logout while drone tracking is on. Please stop the tracking and then logout.",false);
+                   break;
+               }else{
+                   MydApplication.getInstance().getPrefManger().setUser("");
+                   startActivity(new Intent(MainActivity.this,LoginActivity.class));
+                   finish();
+               }
+                break;
+
+        }
+
+        return false;
     }
 }

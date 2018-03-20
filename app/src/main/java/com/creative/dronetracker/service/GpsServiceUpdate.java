@@ -76,10 +76,25 @@ public class GpsServiceUpdate extends Service {
         if (listener == null) {
             listener = new MyLocationListener();
         }
-        locationManager = (LocationManager) getSystemService(getApplicationContext().LOCATION_SERVICE);
-        LocationProvider gpsProvider = locationManager.getProvider(LocationManager.GPS_PROVIDER);
+        if (locationManager == null) {
+            locationManager = (LocationManager) getSystemService(getApplicationContext().LOCATION_SERVICE);
+        }
 
-        if (gpsProvider != null) {
+        //exceptions will be thrown if provider is not permitted.
+        boolean gps_enabled = false, network_enabled = false;
+        try {
+            gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch (Exception ex) {
+        }
+        try {
+            network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch (Exception ex) {
+        }
+
+        //don't start listeners if no provider is enabled
+        if (!gps_enabled && !network_enabled) {
+            return START_STICKY;
+        } else if (gps_enabled) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
@@ -96,6 +111,15 @@ public class GpsServiceUpdate extends Service {
                     MIN_DISTANCE_CHANGE_FOR_UPDATES,
                     listener
             );
+            //Log.d("DEBUG","gps enabled");
+        } else if (network_enabled) {
+            locationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    MIN_TIME_BW_UPDATES,
+                    MIN_DISTANCE_CHANGE_FOR_UPDATES,
+                    listener
+            );
+            // Log.d("DEBUG","network enabled");
         }
 
 
@@ -109,7 +133,7 @@ public class GpsServiceUpdate extends Service {
 
         @Override
         public void onLocationChanged(Location location) {
-             Log.d("DEBUG", "change");
+            Log.d("DEBUG", "change");
 
             final double loc_lat = CommonMethods.roundFloatToFiveDigitAfterDecimal(location.getLatitude());
             final double loc_lng = CommonMethods.roundFloatToFiveDigitAfterDecimal(location.getLongitude());
@@ -140,13 +164,13 @@ public class GpsServiceUpdate extends Service {
 
                 if (DeviceInfoUtils.isConnectingToInternet(_context)) {
 
-                    if(!MydApplication.getInstance().getPrefManger().getDrivingStatus()){
+                    if (!MydApplication.getInstance().getPrefManger().getDrivingStatus()) {
                         hitUrlForGps(
                                 GlobalAppAccess.URL_UPDATE_LOCATION,
                                 MydApplication.getInstance().getPrefManger().getUser().getId(),
                                 user_lat,
-                                user_lang );
-                    }else{
+                                user_lang);
+                    } else {
                         stopSelf();
                     }
                 }
@@ -174,7 +198,7 @@ public class GpsServiceUpdate extends Service {
 
     private void hitUrlForGps(String url, final String id, final String lat, final String lng) {
         // TODO Auto-generated method stub
-        url = url + "?user_id=" + id + "&lat=" + lat + "&lang=" +lng + "&status=true";
+        url = url + "?user_id=" + id + "&lat=" + lat + "&lang=" + lng + "&status=true";
         final StringRequest req = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -182,11 +206,7 @@ public class GpsServiceUpdate extends Service {
 
                         response = response.replaceAll("\\s+", "");
 
-                        Log.d("DEBUG",response);
-
-
-
-
+                        Log.d("DEBUG", response);
 
 
                     }
