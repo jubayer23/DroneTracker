@@ -6,7 +6,7 @@ public class GlobalAppAccess {
 
 
     public static final String APP_NAME = "DroneTracker";
-    public static String BaseUrl = "http://lbe3rtdb-site.etempurl.com/mobileapi/api/";
+    public static String BaseUrl = "http://agrisence.com/agrisenceTracker/mobileapi/api/";
     //public static String BaseUrl = "https://b5e99a4d.ngrok.io/bgb/";
     public static final String URL_LOGIN = BaseUrl +   "login.php";
     public static final String URL_UPDATE_LOCATION = BaseUrl +  "updateLocation.php";

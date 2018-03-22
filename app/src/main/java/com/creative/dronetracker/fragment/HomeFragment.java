@@ -136,7 +136,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener{
 
         //showProgressDialog("Start Delivery....", true, false);
 
-        url = url + "?user_id=" + id + "&lat=" + lat + "&lang=" +lng + "&status=" + status;
+        if(status){
+            url = url + "?user_id=" + id + "&lat=" + lat + "&lang=" +lng + "&status=1" ;
+        }else{
+            url = url + "?user_id=" + id + "&lat=" + lat + "&lang=" +lng + "&status=0" ;
+        }
+
 
         final StringRequest req = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
